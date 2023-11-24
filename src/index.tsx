@@ -1,15 +1,55 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
+import ContractCreator from './components/ContractCreator';
 import reportWebVitals from './reportWebVitals';
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
+import OrderDashboard from './components/OrderDashboard';
+import ContractEditor from './components/ContractEditor';
+import Support from './components/Support';
+import Settings from './components/Settings';
+import LogInPage from './components/LogInPage';
+
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <OrderDashboard/>,
+  },
+  {
+    path: "/create",
+    element: <ContractCreator/>
+  },
+  {
+    path: "/edit",
+    element: <ContractEditor/>
+  },
+  {
+    path: "/support",
+    element: <Support/>
+  },
+  {
+    path: "/settings",
+    element: <Settings/>
+  },
+  {
+    path: "/login",
+    element: <LogInPage />
+  },
+  {
+    path: '*',
+    element: <h1>404 - Not Found</h1>
+  }
+]);
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <RouterProvider router={router} />
   </React.StrictMode>
 );
 
