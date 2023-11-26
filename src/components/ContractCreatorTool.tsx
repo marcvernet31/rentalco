@@ -31,7 +31,8 @@ import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 
 import { ContractCreationStatus } from '../data/ContractCreationStatus';
 import { PDFDownloadLink } from '@react-pdf/renderer';
-import Quijote from '../templates/Quijote';
+
+import ApartmentRental from '../templates/ApartmentRental';
 
 
 export default function ContractCreatorTool() {
@@ -136,7 +137,7 @@ export default function ContractCreatorTool() {
                             size="sm"                                 
                             startDecorator={<DownloadIcon/>}
                         >
-                            <PDFDownloadLink document={<Quijote />} fileName={"yourContract.pdf"}>
+                            <PDFDownloadLink document={<ApartmentRental/>} fileName={"yourContract.pdf"}>
                                 Download Contract
                             </PDFDownloadLink>
                         </Button>

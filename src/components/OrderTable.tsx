@@ -41,7 +41,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import type { Order } from "../types/Order";
 import { SortUtils } from '../utils/SortUtils';
 
-import Quijote from '../templates/Quijote';
+import ApartmentRental from '../templates/ApartmentRental';
 
 // TODO: Substitute for database fetch
 const rows = [
@@ -398,9 +398,9 @@ export default function OrderTable() {
                 <td>
                   <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                     <Link level="body-xs" component="button">
-                      <PDFDownloadLink document={<Quijote />} fileName={`${row.id}.pdf`}>
+                      <PDFDownloadLink document={<ApartmentRental />} fileName={`${row.id}.pdf`}>
 
-                      <Typography level="body-xs" color="primary">{row.customer.name}</Typography>
+                      <Typography level="body-xs" color="primary"> Download </Typography>
                       </PDFDownloadLink>
                     </Link>
                     <RowMenu/>
