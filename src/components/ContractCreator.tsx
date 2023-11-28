@@ -6,15 +6,18 @@ import { CssVarsProvider } from '@mui/joy/styles/CssVarsProvider';
 import Header from './Header';
 import Sidebar from './Sidebar';
 
+import { AuthInput } from '../types/AuthInput';
 
-export default function ContractCreator() {
+interface ContractCreatorProps extends AuthInput {}
+
+export default function ContractCreator({signOut, user}: ContractCreatorProps) {
 
     return(
         <CssVarsProvider disableTransitionOnChange>        
             <CssBaseline />
             <Box sx={{ display: 'flex', minHeight: '100dvh' }}>
                 <Header />
-                <Sidebar />
+                <Sidebar signOut={signOut} user={user} />
 
                 <Box
                     component="main"

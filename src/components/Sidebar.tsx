@@ -17,12 +17,12 @@ import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import HomeIcon from '@mui/icons-material/Home';
 
-
 import ColorSchemeToggle from './ColorSchemeToggle';
 import { closeSidebar } from '../utils';
 
+import { AuthInput } from "../types/AuthInput";
 
-export default function Sidebar() {
+export default function Sidebar({signOut, user}: AuthInput) {
   const navigate = useNavigate();
 
   return (
@@ -134,10 +134,10 @@ export default function Sidebar() {
           src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=286"
         />
         <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography level="title-sm">Marc V.</Typography>
+          <Typography level="title-sm"> { user?.userId } </Typography>
           <Typography level="body-xs">mrcvs31@gmail.com</Typography>
         </Box>
-        <IconButton size="sm" variant="plain" color="neutral" onClick={() => navigate("/login")}>
+        <IconButton size="sm" variant="plain" color="neutral" onClick={signOut}>
           <LogoutRoundedIcon />
         </IconButton>
       </Box>

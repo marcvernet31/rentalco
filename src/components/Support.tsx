@@ -4,12 +4,16 @@ import Box from '@mui/joy/Box';
 import CssBaseline from '@mui/joy/CssBaseline';
 import Sidebar from './Sidebar';
 
-export default function Support() {
+import { AuthInput } from '../types/AuthInput';
+
+interface SupportProps extends AuthInput {}
+
+export default function Support({signOut, user}: SupportProps) {
     return(
         <CssVarsProvider disableTransitionOnChange>
             <CssBaseline />
             <Box sx={{ display: 'flex', minHeight: '100dvh' }}>
-                <Sidebar />
+                <Sidebar signOut={signOut} user={user} />
                 <Box
                     component="main"
                     className="MainContent"

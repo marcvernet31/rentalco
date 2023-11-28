@@ -15,10 +15,15 @@ import OrderList from './OrderList';
 import Sidebar from './Sidebar';
 import Header from './Header';
 
+import { AuthInput } from '../types/AuthInput';
+
+interface OrderDashboardProps extends AuthInput {}
+
 const useEnhancedEffect =
   typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
-export default function OrderDashboard() {
+export default function OrderDashboard({signOut, user}: OrderDashboardProps) {
+
   const status = useScript(`https://unpkg.com/feather-icons`);
 
   const navigate = useNavigate();
@@ -37,7 +42,7 @@ export default function OrderDashboard() {
       <CssBaseline />
       <Box sx={{ display: 'flex', minHeight: '100dvh' }}>
         <Header />
-        <Sidebar />
+        <Sidebar signOut={signOut} user={user} />
         <Box
           component="main"
           className="MainContent"

@@ -4,12 +4,16 @@ import Box from '@mui/joy/Box';
 import CssBaseline from '@mui/joy/CssBaseline';
 import Sidebar from './Sidebar';
 
-export default function ContractEditor() {
+import { AuthInput } from '../types/AuthInput';
+
+interface ContractEditorProps extends AuthInput {}
+
+export default function ContractEditor({signOut, user}: ContractEditorProps) {
     return(
         <CssVarsProvider disableTransitionOnChange>
             <CssBaseline />
             <Box sx={{ display: 'flex', minHeight: '100dvh' }}>
-                <Sidebar />
+                <Sidebar signOut={signOut} user={user} />
                 <Box
                     component="main"
                     className="MainContent"

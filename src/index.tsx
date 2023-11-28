@@ -12,31 +12,47 @@ import Support from './components/Support';
 import Settings from './components/Settings';
 import LogInPage from './components/LogInPage';
 
+import {Amplify } from 'aws-amplify';
+import '@aws-amplify/ui-react/styles.css';
+import { AuthInput } from './types/AuthInput';
+import { Authenticator } from '@aws-amplify/ui-react';
 
-const router = createBrowserRouter([
+import awsExports from './aws-exports';
+
+
+const awsmobile = {
+  "aws_project_region": awsExports.REGION,
+  "aws_user_pools_id": awsExports.USER_POOL_ID,
+  "aws_user_pools_web_client_id": awsExports.USER_POOL_APP_CLIENT_ID,
+};
+
+Amplify.configure(awsmobile);
+
+
+const router = ({signOut, user}: AuthInput) => createBrowserRouter([
   {
     path: "/",
-    element: <OrderDashboard/>,
+    element: <OrderDashboard signOut={signOut} user={user}/>,
   },
   {
     path: "/create",
-    element: <ContractCreator/>
+    element: <ContractCreator signOut={signOut} user={user}/>
   },
   {
     path: "/edit",
-    element: <ContractEditor/>
+    element: <ContractEditor signOut={signOut} user={user}/>
   },
   {
     path: "/support",
-    element: <Support/>
+    element: <Support signOut={signOut} user={user}/>
   },
   {
     path: "/settings",
-    element: <Settings/>
+    element: <Settings signOut={signOut} user={user}/>
   },
   {
     path: "/login",
-    element: <LogInPage />
+    element: <LogInPage/>
   },
   {
     path: '*',
@@ -49,7 +65,11 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <Authenticator>
+      {({ signOut, user }) => (
+        <RouterProvider router={router({signOut, user})} />
+      )}
+    </Authenticator>
   </React.StrictMode>
 );
 
