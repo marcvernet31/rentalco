@@ -21,126 +21,183 @@ import ColorSchemeToggle from './ColorSchemeToggle';
 import { closeSidebar } from '../utils';
 
 import { AuthInput } from "../types/AuthInput";
+import Button from "@mui/joy/Button";
+import ModalDialog from "@mui/joy/ModalDialog";
+import Modal from "@mui/joy/Modal";
+import React from "react";
 
 export default function Sidebar({signOut, user}: AuthInput) {
   const navigate = useNavigate();
 
-  return (
-    <Sheet
-      className="Sidebar"
-      sx={{
-        position: {
-          xs: 'fixed',
-          md: 'sticky',
-        },
-        transform: {
-          xs: 'translateX(calc(100% * (var(--SideNavigation-slideIn, 0) - 1)))',
-          md: 'none',
-        },
-        transition: 'transform 0.4s, width 0.4s',
-        zIndex: 10000,
-        height: '100dvh',
-        width: 'var(--Sidebar-width)',
-        top: 0,
-        p: 2,
-        flexShrink: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 2,
-        borderRight: '1px solid',
-        borderColor: 'divider',
-      }}
-    >
-      <GlobalStyles
-        styles={(theme) => ({
-          ':root': {
-            '--Sidebar-width': '220px',
-            [theme.breakpoints.up('lg')]: {
-              '--Sidebar-width': '240px',
-            },
-          },
-        })}
-      />
-      <Box
-        className="Sidebar-overlay"
-        sx={{
-          position: 'fixed',
-          zIndex: 9998,
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          opacity: 'var(--SideNavigation-slideIn)',
-          backgroundColor: 'var(--joy-palette-background-backdrop)',
-          transition: 'opacity 0.4s',
-          transform: {
-            xs: 'translateX(calc(100% * (var(--SideNavigation-slideIn, 0) - 1) + var(--SideNavigation-slideIn, 0) * var(--Sidebar-width, 0px)))',
-            lg: 'translateX(-100%)',
-          },
-        }}
-        onClick={() => closeSidebar()}
-      />
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-        <IconButton variant="soft" color="primary" size="lg"  onClick={() => navigate("/")} >
-          <HomeIcon />
-        </IconButton>
-        <Typography level="title-lg">Rental Co.</Typography>
-        <ColorSchemeToggle sx={{ ml: 'auto' }} />
-      </Box>
-      <Input size="sm" startDecorator={<SearchRoundedIcon />} placeholder="Search" />
+  const [openLogout, setOpenLogout] = React.useState(false);
 
-      <Box
+  const LogoutModal = () => {
+    return(
+      <Modal open={openLogout} onClose={() => setOpenLogout(false)}>
+        <ModalDialog
+          aria-labelledby="nested-modal-title"
+          aria-describedby="nested-modal-description"
+          sx={(theme) => ({
+            [theme.breakpoints.only('xs')]: {
+              top: 'unset',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              borderRadius: 0,
+              transform: 'none',
+              maxWidth: 'unset',
+            },
+          })}
+        >
+          <Typography id="nested-modal-title" level="h2">
+            Confirm logout
+          </Typography>
+          <Typography id="nested-modal-description" textColor="text.tertiary">
+            Are you sure you want to log out?
+          </Typography>
+          <Box
+            sx={{
+              mt: 1,
+              display: 'flex',
+              gap: 1,
+              flexDirection: { xs: 'column', sm: 'row-reverse' },
+            }}
+          >
+            <Button variant="solid" color="danger" onClick={signOut}>
+              Log Out
+            </Button>
+            <Button
+              variant="outlined"
+              color="neutral"
+              onClick={() => setOpenLogout(false)}
+            >
+              Cancel
+            </Button>
+          </Box>
+        </ModalDialog>
+      </Modal>
+    )
+  }
+
+  return (
+    <>
+    {LogoutModal()}
+      <Sheet
+        className="Sidebar"
         sx={{
-          minHeight: 0,
-          overflow: 'hidden auto',
-          flexGrow: 1,
+          position: {
+            xs: 'fixed',
+            md: 'sticky',
+          },
+          transform: {
+            xs: 'translateX(calc(100% * (var(--SideNavigation-slideIn, 0) - 1)))',
+            md: 'none',
+          },
+          transition: 'transform 0.4s, width 0.4s',
+          zIndex: 10000,
+          height: '100dvh',
+          width: 'var(--Sidebar-width)',
+          top: 0,
+          p: 2,
+          flexShrink: 0,
           display: 'flex',
           flexDirection: 'column',
-          [`& .${listItemButtonClasses.root}`]: {
-            gap: 1.5,
-          },
+          gap: 2,
+          borderRight: '1px solid',
+          borderColor: 'divider',
         }}
       >
-
-        <List
-          size="sm"
+        <GlobalStyles
+          styles={(theme) => ({
+            ':root': {
+              '--Sidebar-width': '220px',
+              [theme.breakpoints.up('lg')]: {
+                '--Sidebar-width': '240px',
+              },
+            },
+          })}
+        />
+        <Box
+          className="Sidebar-overlay"
           sx={{
-            mt: 'auto',
-            flexGrow: 0,
-            '--ListItem-radius': (theme) => theme.vars.radius.sm,
-            '--List-gap': '8px',
-            mb: 2,
+            position: 'fixed',
+            zIndex: 9998,
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            opacity: 'var(--SideNavigation-slideIn)',
+            backgroundColor: 'var(--joy-palette-background-backdrop)',
+            transition: 'opacity 0.4s',
+            transform: {
+              xs: 'translateX(calc(100% * (var(--SideNavigation-slideIn, 0) - 1) + var(--SideNavigation-slideIn, 0) * var(--Sidebar-width, 0px)))',
+              lg: 'translateX(-100%)',
+            },
+          }}
+          onClick={() => closeSidebar()}
+        />
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          <IconButton variant="soft" color="primary" size="lg"  onClick={() => navigate("/")} >
+            <HomeIcon />
+          </IconButton>
+          <Typography level="title-lg">Rental Co.</Typography>
+          <ColorSchemeToggle sx={{ ml: 'auto' }} />
+        </Box>
+        <Input size="sm" startDecorator={<SearchRoundedIcon />} placeholder="Search" />
+
+        <Box
+          sx={{
+            minHeight: 0,
+            overflow: 'hidden auto',
+            flexGrow: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            [`& .${listItemButtonClasses.root}`]: {
+              gap: 1.5,
+            },
           }}
         >
-          <ListItem>
-            <ListItemButton onClick={() => navigate("/support")}>
-              <SupportRoundedIcon />
-              Support
-            </ListItemButton>
-          </ListItem>
-          <ListItem>
-            <ListItemButton onClick={() => navigate("/settings")}>
-              <SettingsRoundedIcon />
-              Settings
-            </ListItemButton>
-          </ListItem>
-        </List>
-      </Box>
-      <Divider />
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-        <Avatar
-          variant="outlined"
-          size="sm"
-          src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=286"
-        />
-        <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography level="title-sm"> { user?.userId } </Typography>
-          <Typography level="body-xs">mrcvs31@gmail.com</Typography>
+
+          <List
+            size="sm"
+            sx={{
+              mt: 'auto',
+              flexGrow: 0,
+              '--ListItem-radius': (theme) => theme.vars.radius.sm,
+              '--List-gap': '8px',
+              mb: 2,
+            }}
+          >
+            <ListItem>
+              <ListItemButton onClick={() => navigate("/support")}>
+                <SupportRoundedIcon />
+                Support
+              </ListItemButton>
+            </ListItem>
+            <ListItem>
+              <ListItemButton onClick={() => navigate("/settings")}>
+                <SettingsRoundedIcon />
+                Settings
+              </ListItemButton>
+            </ListItem>
+          </List>
         </Box>
-        <IconButton size="sm" variant="plain" color="neutral" onClick={signOut}>
-          <LogoutRoundedIcon />
-        </IconButton>
-      </Box>
-    </Sheet>
+        <Divider />
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          <Avatar
+            variant="outlined"
+            size="sm"
+            src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=286"
+          />
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography level="title-sm"> { user?.userId } </Typography>
+            <Typography level="body-xs">mrcvs31@gmail.com</Typography>
+          </Box>
+          <IconButton size="sm" variant="plain" color="neutral" onClick={() => setOpenLogout(true)}>
+            <LogoutRoundedIcon />
+          </IconButton>
+        </Box>
+      </Sheet>
+    </>
   );
 }
