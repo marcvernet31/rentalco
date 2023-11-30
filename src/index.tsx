@@ -12,13 +12,14 @@ import Support from './components/Support';
 import Settings from './components/Settings';
 import LogInPage from './components/LogInPage';
 
+import AWS from 'aws-sdk';
 import {Amplify } from 'aws-amplify';
 import '@aws-amplify/ui-react/styles.css';
 import { AuthInput } from './types/AuthInput';
 import { Authenticator } from '@aws-amplify/ui-react';
 
 import awsExports from './aws-exports';
-
+import { Constants } from './utils/Constants';
 
 const awsmobile = {
   "aws_project_region": awsExports.REGION,
@@ -27,6 +28,13 @@ const awsmobile = {
 };
 
 Amplify.configure(awsmobile);
+
+//TODO: Migrate auth to IAM role when deployed
+AWS.config.update({
+  region: Constants.awsRegionName,
+  accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY
+});
 
 
 const router = ({signOut, user}: AuthInput) => createBrowserRouter([
