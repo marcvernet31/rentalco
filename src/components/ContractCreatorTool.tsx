@@ -32,7 +32,10 @@ import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 import { ContractCreationStatus } from '../data/ContractCreationStatus';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 
+import uuidv4 from '../utils/uuidv4';
+import { ContractType } from '../data/ContractType';
 import ApartmentRental from '../templates/ApartmentRental';
+import DynamodbAccessor from '../aws/DynamodbAccessor';
 
 
 export default function ContractCreatorTool() {
@@ -44,12 +47,32 @@ export default function ContractCreatorTool() {
 
     const navigate = useNavigate();
 
+    const contractsDB = new DynamodbAccessor("rentalco-contracts")
+
     const createContract = () => {
+        const contractPayload = {
+            UUID: uuidv4(),
+            contractType: ContractType.ApartmentRental,
+            contractName: "contractName",
+            landlordInfo: {
+                firstName: "Marc",
+                lastName: "Vernet",
+                phoneNumber: null, 
+                email: null
+            }, 
+            tenantInfo: {
+                firstName: "Maria",
+                lastName: "Pedrassa",
+                phoneNumber: null, 
+                email: null
+            }, 
+            additionalClausules: []
+        }
+
         setCreationStatus(ContractCreationStatus.Building)
-        setTimeout(() => {
-            setCreationStatus(ContractCreationStatus.Done)
-        }, 1000);
-          
+        // TODO: handle success or error and show on UI
+        contractsDB.putDocument(contractPayload)
+        setCreationStatus(ContractCreationStatus.Done)
     }
 
     const InformationMessage = () => {

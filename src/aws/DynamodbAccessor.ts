@@ -2,11 +2,8 @@ import AWS from 'aws-sdk';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 
 type AbstractContractInput = {
-  userId: string;
+  UUID: string;
 };
-
-// TODO: Chnage depending on final table key
-const TABLE_KEY = "userId";
 
 export default class DynamodbAccessor {
   private client: DocumentClient;
@@ -36,7 +33,7 @@ export default class DynamodbAccessor {
   public deleteDocument = (key: string) => {
     const params = {
       Key: {
-        [TABLE_KEY]: key
+        "UUID": key
       },
       TableName: this.table
     };
@@ -54,7 +51,7 @@ export default class DynamodbAccessor {
       ExpressionAttributeValues: {
         ':v': value
        },
-       KeyConditionExpression: 'userId = :v',
+       KeyConditionExpression: 'UUID = :v',
        TableName: this.table
     }
 
