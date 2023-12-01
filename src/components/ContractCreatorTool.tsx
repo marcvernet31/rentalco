@@ -29,16 +29,20 @@ import DownloadIcon from '@mui/icons-material/Download';
 import DoneOutlineIcon from '@mui/icons-material/DoneOutline';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 
-import { ContractCreationStatus } from '../data/ContractCreationStatus';
+import { AuthUser } from "aws-amplify/auth";
 import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import uuidv4 from '../utils/uuidv4';
 import { ContractType } from '../data/ContractType';
-import ApartmentRental from '../templates/ApartmentRental';
 import DynamodbAccessor from '../aws/DynamodbAccessor';
+import ApartmentRental from '../templates/ApartmentRental';
+import { ContractCreationStatus } from '../data/ContractCreationStatus';
 
+interface ContractCreatorToolProps {
+    user:  AuthUser | undefined;
+}
 
-export default function ContractCreatorTool() {
+export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
     const clausuleDefaultPlaceholder = "The tenant needs to open the windows of the room every morning for at least 15 minutes to follow the german Stoßlüften tradition. (not a joke)"
     
     const [savedClausules, setSavedClausules] = React.useState<string[]>([])
@@ -52,6 +56,7 @@ export default function ContractCreatorTool() {
     const createContract = () => {
         const contractPayload = {
             UUID: uuidv4(),
+            userId: user?.userId,
             contractType: ContractType.ApartmentRental,
             contractName: "contractName",
             landlordInfo: {

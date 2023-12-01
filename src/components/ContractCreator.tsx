@@ -43,7 +43,7 @@ export default function ContractCreator({signOut, user}: ContractCreatorProps) {
 
                     }}
                 >
-                    <ContractCreatorTool />
+                    <ContractCreatorTool user={user} />
                 </Box>
             </Box>
         </CssVarsProvider>
