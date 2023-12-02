@@ -59,6 +59,7 @@ interface TenantInfo {
 
 interface Row {
   id: string,
+  contractName: string,
   date: string,
   type: string,
   tenant: {
@@ -69,10 +70,12 @@ interface Row {
 }
 
 export default function OrderTable({user}: OrderTableProps) {
+  const [rename, setRename] = React.useState<string>('');
   const [order, setOrder] = React.useState<Order>('desc');  
   const [openLogout, setOpenLogout] = React.useState(false);
   const [searchBar, setSearchBar]  = React.useState<string>('');
   const [contractsFromDB, setContractsFromDB] = React.useState<Row[]>([]);
+  const [selectedContract, setSelectedContract] = React.useState<string>('');
   const [openDeleteContract, setOpenDeleteContract] = React.useState(false);
   const [openRenameContract, setOpenRenameContract] = React.useState(false);
   const [contractType, setContractType] = React.useState<string | null>('all');
@@ -91,7 +94,8 @@ export default function OrderTable({user}: OrderTableProps) {
     return data!.map((item) => {
       const tenantInfo: TenantInfo = item.tenantInfo as TenantInfo
       return {
-        id: item.contractName.toString(),
+        id: item.UUID.toString(),
+        contractName: item.contractName.toString(),
         date: 'Feb 3, 2023',
         type: item.contractType.toString(),
         tenant: {
@@ -168,17 +172,23 @@ export default function OrderTable({user}: OrderTableProps) {
       <ModalDialog>
         <DialogTitle> Rename contract </DialogTitle>
         <form
-          onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
+          onSubmit={(event) => {
             event.preventDefault();
-            setOpenRenameContract(false);
           }}
         >
           <Stack spacing={2}>
             <FormControl>
               <FormLabel>New name</FormLabel>
-              <Input autoFocus required />
+              <Input autoFocus required onChange={(event) => setRename(event.target.value)} />
             </FormControl>
-            <Button type="submit">Rename</Button>
+            <Button type="submit" 
+            onClick={
+              () => {
+                contractTable.updateContractName(selectedContract, rename)
+                setOpenRenameContract(false);
+              }
+            }
+            >Rename</Button>
           </Stack>
         </form>
       </ModalDialog>
@@ -212,7 +222,8 @@ export default function OrderTable({user}: OrderTableProps) {
     )
   }
 
-  const  RowMenu = () => {
+  const RowMenu: React.FC<{rowId: string}> = ({rowId}) => {
+    // TODO: Add user notification when succesfully renamed
     return (
       <Dropdown>
         <MenuButton
@@ -223,7 +234,13 @@ export default function OrderTable({user}: OrderTableProps) {
         </MenuButton>
         <Menu size="sm" sx={{ minWidth: 140 }}>
           <MenuItem onClick={() => navigate("/edit")}>Edit</MenuItem>
-          <MenuItem onClick={() => setOpenRenameContract(true)}>
+          <MenuItem 
+            onClick={() => {
+                setSelectedContract(rowId)
+                setOpenRenameContract(true)
+              }
+            }
+          >
             Rename
           </MenuItem>
           <Divider />
@@ -354,15 +371,15 @@ export default function OrderTable({user}: OrderTableProps) {
           </thead>
           <tbody>
             {SortUtils.stableSort(contractsFromDB, SortUtils.getComparator(order, 'id'))
-            .filter((row) => row.id.toLowerCase().includes(searchBar.toLowerCase()))
+            .filter((row) => row.contractName.toLowerCase().includes(searchBar.toLowerCase()))
             .filter((row) => contractType == 'all' ? true : row.type == contractType)
             .filter((row) => selectedTenant == 'all' ? true : row.tenant.name == selectedTenant)
             .map((row) => (
-              <tr key={row.id}>
+              <tr key={row.contractName}>
                 <td style={{ textAlign: 'center', width: 120 }}>
                 </td>
                 <td>
-                  <Typography level="body-xs">{row.id}</Typography>
+                  <Typography level="body-xs">{row.contractName}</Typography>
                 </td>
                 <td>
                   <Typography level="body-xs">{row.date}</Typography>
@@ -399,7 +416,7 @@ export default function OrderTable({user}: OrderTableProps) {
                       <Typography level="body-xs" color="primary"> Download </Typography>
                       </PDFDownloadLink>
                     </Link>
-                    <RowMenu/>
+                    <RowMenu rowId={row.id}/>
                   </Box>
                 </td>
               </tr>
