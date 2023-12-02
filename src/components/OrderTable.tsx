@@ -40,82 +40,78 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 import type { Order } from "../types/Order";
 import { SortUtils } from '../utils/SortUtils';
-
 import ApartmentRental from '../templates/ApartmentRental';
+import ContractTableReader from '../aws/ContractTableReader';
 
-// TODO: Substitute for database fetch
-const rows = [
-  {
-    id: 'Longwy 348 - Room 2',
-    date: 'Feb 3, 2023',
-    type: 'roomRental',
-    customer: {
-      initial: 'O',
-      name: 'Olivia Ryhe',
-      email: 'olivia@email.com',
-    },
-  },
-  {
-    id: 'Longwy 348 - Room 1',
-    date: 'Feb 3, 2023',
-    type: 'roomRental',
-    customer: {
-      initial: 'S',
-      name: 'Steve Hampton',
-      email: 'steve.hamp@email.com',
-    },
-  },
-  {
-    id: 'Longwy 348 - Room 3',
-    date: 'Feb 3, 2023',
-    type: 'roomRental',
-    customer: {
-      initial: 'C',
-      name: 'Ciaran Murray',
-      email: 'ciaran.murray@email.com',
-    },
-  },
-  {
-    id: 'Longwy 348 - Room 4',
-    date: 'Feb 3, 2023',
-    type: 'roomRental',
-    customer: {
-      initial: 'M',
-      name: 'Maria Macdonald',
-      email: 'maria.mc@email.com',
-    },
-  },
-  {
-    id: 'Rue Petrusse Apt.',
-    date: 'Feb 3, 2023',
-    type: 'apartmentRental',
-    customer: {
-      initial: 'M',
-      name: 'Maria Macdonald',
-      email: 'maria.mc@email.com',
-    },
-  }
-];
-const customers = [
-    "Olivia Ryhe",
-    "Steve Hampton",
-    "Ciaran Murray",
-    "Maria Macdonald",
-    "Charles Fulton",
-    "Jay Hoper"
-]
+import { AuthUser } from "aws-amplify/auth";
+import { ItemList } from 'aws-sdk/clients/dynamodb';
 
-export default function OrderTable() {
+interface OrderTableProps {
+  user: AuthUser | undefined;
+}
+
+interface TenantInfo {
+  firstName: string,
+  lastName: string,
+  phoneNumber: string | null, 
+  email: string | null
+}
+
+interface Row {
+  id: string,
+  date: string,
+  type: string,
+  tenant: {
+    initial: string,
+    name: string,
+    email: string,
+  },
+}
+
+export default function OrderTable({user}: OrderTableProps) {
   const [order, setOrder] = React.useState<Order>('desc');  
-  const [contractType, setContractType] = React.useState<string | null>('all');
-  const [selectedCustomer, setSelectedCustomer] = React.useState<string | null>('all');
+  const [openLogout, setOpenLogout] = React.useState(false);
   const [searchBar, setSearchBar]  = React.useState<string>('');
-
+  const [contractsFromDB, setContractsFromDB] = React.useState<Row[]>([]);
   const [openDeleteContract, setOpenDeleteContract] = React.useState(false);
   const [openRenameContract, setOpenRenameContract] = React.useState(false);
-  const [openLogout, setOpenLogout] = React.useState(false);
+  const [contractType, setContractType] = React.useState<string | null>('all');
+  const [selectedTenant, setSelectedTenant] = React.useState<string | null>('all');
 
+  React.useEffect(() => { getContractsFromDB() }, [setContractsFromDB])
+
+  const contractTable = new ContractTableReader(); 
   const navigate = useNavigate();
+
+  const getTenantsFromContracts = function() {
+    return contractsFromDB.map((row) => {return row.tenant.name})
+  }
+
+  const mapRowsFromContracts = function(data: ItemList): Row[] {
+    return data!.map((item) => {
+      const tenantInfo: TenantInfo = item.tenantInfo as TenantInfo
+      return {
+        id: item.contractName.toString(),
+        date: 'Feb 3, 2023',
+        type: item.contractType.toString(),
+        tenant: {
+          initial: tenantInfo.firstName[0],
+          name: `${tenantInfo.firstName} ${tenantInfo.lastName}`,
+          email: tenantInfo.email || 'example@gmail.com',
+        },
+      };
+    })
+  }
+
+  const getContractsFromDB = () => {
+    contractTable.queryByUserId(user?.userId || "", function(err, data) {
+      if (err) {
+        console.error(err);
+      } else {
+        const rowsFromContracts = mapRowsFromContracts(data!)
+        setContractsFromDB(rowsFromContracts)
+      }})
+  }
 
   const LogoutModal = () => {
     return(
@@ -256,11 +252,11 @@ export default function OrderTable() {
       </FormControl>
 
       <FormControl size="sm">
-        <FormLabel>Customer</FormLabel>
+        <FormLabel>Tenant</FormLabel>
         <Select size="sm" placeholder="All" >
-          <Option value="all"  onClick={() => setSelectedCustomer('all')}>All</Option>
-          {customers.map((c) => 
-            <Option value={c} onClick={() => setSelectedCustomer(c)}> {c} </Option>
+          <Option value="all"  onClick={() => setSelectedTenant('all')}>All</Option>
+          {getTenantsFromContracts().map((c) => 
+            <Option value={c} onClick={() => setSelectedTenant(c)}> {c} </Option>
           )}
         </Select>
       </FormControl>
@@ -352,15 +348,15 @@ export default function OrderTable() {
               </th>
               <th style={{ width: 140, padding: '12px 6px' }}>Date</th>
               <th style={{ width: 140, padding: '12px 6px' }}>Contract Type</th>
-              <th style={{ width: 240, padding: '12px 6px' }}>Customer</th>
+              <th style={{ width: 240, padding: '12px 6px' }}>Tenant</th>
               <th style={{ width: 140, padding: '12px 6px' }}> </th>
             </tr>
           </thead>
           <tbody>
-            {SortUtils.stableSort(rows, SortUtils.getComparator(order, 'id'))
+            {SortUtils.stableSort(contractsFromDB, SortUtils.getComparator(order, 'id'))
             .filter((row) => row.id.toLowerCase().includes(searchBar.toLowerCase()))
             .filter((row) => contractType == 'all' ? true : row.type == contractType)
-            .filter((row) => selectedCustomer == 'all' ? true : row.customer.name == selectedCustomer)
+            .filter((row) => selectedTenant == 'all' ? true : row.tenant.name == selectedTenant)
             .map((row) => (
               <tr key={row.id}>
                 <td style={{ textAlign: 'center', width: 120 }}>
@@ -388,10 +384,10 @@ export default function OrderTable() {
                 </td>
                 <td>
                   <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                    <Avatar size="sm">{row.customer.initial}</Avatar>
+                    <Avatar size="sm">{row.tenant.initial}</Avatar>
                     <div>
-                      <Typography level="body-xs">{row.customer.name}</Typography>
-                      <Typography level="body-xs">{row.customer.email}</Typography>
+                      <Typography level="body-xs">{row.tenant.name}</Typography>
+                      <Typography level="body-xs">{row.tenant.email}</Typography>
                     </div>
                   </Box>
                 </td>

@@ -34,7 +34,7 @@ import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import uuidv4 from '../utils/uuidv4';
 import { ContractType } from '../data/ContractType';
-import DynamodbAccessor from '../aws/DynamodbAccessor';
+import DynamodbReader from '../aws/DynamodbReader';
 import ApartmentRental from '../templates/ApartmentRental';
 import { ContractCreationStatus } from '../data/ContractCreationStatus';
 
@@ -51,7 +51,7 @@ export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
 
     const navigate = useNavigate();
 
-    const contractsDB = new DynamodbAccessor("rentalco-contracts")
+    const contractsDB = new DynamodbReader("rentalco-contracts")
 
     const createContract = () => {
         const contractPayload = {

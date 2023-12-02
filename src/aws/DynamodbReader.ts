@@ -5,13 +5,21 @@ type AbstractContractInput = {
   UUID: string;
 };
 
-export default class DynamodbAccessor {
+export default class DynamodbReader {
   private client: DocumentClient;
   private table: string;
 
   constructor(tableName: string) {
     this.table = tableName
     this.client =  new AWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'});
+  }
+
+  public getTableName() {
+    return this.table
+  }
+
+  public getClient() {
+    return this.client
   }
 
   public putDocument = (input: AbstractContractInput) => {

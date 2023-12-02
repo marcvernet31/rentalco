@@ -90,7 +90,7 @@ export default function OrderDashboard({signOut, user}: OrderDashboardProps) {
               Create new contract
             </Button>
           </Box>
-          <OrderTable />
+          <OrderTable user={user} />
           <OrderList />
         </Box>       
       </Box>
