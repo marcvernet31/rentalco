@@ -210,7 +210,13 @@ export default function OrderTable({user}: OrderTableProps) {
             Are you sure you want to delete this contract?
           </DialogContent>
           <DialogActions>
-            <Button variant="solid" color="danger" onClick={() => setOpenDeleteContract(false)}>
+            <Button variant="solid" color="danger" 
+              onClick={() => {
+                contractTable.deleteDocument(selectedContract)
+                setOpenDeleteContract(false)
+              }
+            }
+            >
               Delete
             </Button>
             <Button variant="plain" color="neutral" onClick={() => setOpenDeleteContract(false)}>
@@ -224,6 +230,7 @@ export default function OrderTable({user}: OrderTableProps) {
 
   const RowMenu: React.FC<{rowId: string}> = ({rowId}) => {
     // TODO: Add user notification when succesfully renamed
+    // TODO: Add user notification when succesfully deleted
     return (
       <Dropdown>
         <MenuButton
@@ -244,7 +251,13 @@ export default function OrderTable({user}: OrderTableProps) {
             Rename
           </MenuItem>
           <Divider />
-          <MenuItem color="danger" onClick={() => setOpenDeleteContract(true)} >
+          <MenuItem color="danger" 
+            onClick={() => { 
+              setSelectedContract(rowId)
+              setOpenDeleteContract(true)
+              }
+            } 
+          >
             Delete
           </MenuItem>
         </Menu>
