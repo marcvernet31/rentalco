@@ -44,13 +44,13 @@ interface ContractCreatorToolProps {
     user:  AuthUser | undefined;
 }
 
+const defaultContractName = "contract_name"
 const clausuleDefaultPlaceholder = "The tenant needs to open the windows of the room every morning for at least 15 minutes to follow the german Stoßlüften tradition. (not a joke)"
-
 const defaultContractInput: ContractInput = {
     UUID: "",
     userId: "unknown",
     contractType: ContractType.Other,
-    contractName: "",
+    contractName: defaultContractName,
     creationDate: "",
     landlordInfo: {
         firstName: "",
@@ -301,6 +301,54 @@ export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
             </Card>
         )
     }
+
+    const ContractNameCard = () => {
+        return(
+            <Card>
+                <Box sx={{ mb: 1 }}>
+                    <Typography level="title-md"> Contract Name</Typography>
+                    <Typography level="body-sm">
+                        Enter name by which you want to identify this contract
+                    </Typography>
+                </Box> 
+                <Divider />
+
+                <Stack
+                    direction="row"
+                    spacing={3}
+                    sx={{ display: { xs: 'none', md: 'flex' }, my: 1 }}
+                >
+                    <Stack direction="column" spacing={1}></Stack>
+                    <Stack spacing={2} sx={{ flexGrow: 1 }} >
+                        <Stack spacing={1}>
+                            <FormLabel>Name</FormLabel>
+                            <FormControl
+                                sx={{
+                                    display: {
+                                    sm: 'flex-column',
+                                    md: 'flex-row',
+                                    },
+                                    gap: 2,
+                                }}
+                            >
+                                 <Input size="sm" placeholder="Contract name"
+                                        onChange={(event) => 
+                                            setContractInput(
+                                                {
+                                                    ...contractInput, 
+                                                    contractName: event.target.value
+                                                }
+                                            )
+                                        }
+                                    />
+                            </FormControl>
+                        </Stack>
+                </Stack>
+            </Stack>
+        </Card>
+        )
+    }
+
 
     const TenantInfoCard = () => {
         return(
@@ -605,6 +653,7 @@ export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
             >
                 {creationStatus == ContractCreationStatus.Writting ?
                     <>
+                        {ContractNameCard()}
                         {LandlordInfoCard()}
                         {TenantInfoCard()}
                         {DateRangeCard()}
