@@ -33,46 +33,62 @@ import { AuthUser } from "aws-amplify/auth";
 import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import uuidv4 from '../utils/uuidv4';
-import { ContractType } from '../data/ContractType';
+import ContractInput from '../types/ContractInput';
 import DynamodbReader from '../aws/DynamodbReader';
+import { ContractType } from '../data/ContractType';
 import ApartmentRental from '../templates/ApartmentRental';
 import { ContractCreationStatus } from '../data/ContractCreationStatus';
+
 
 interface ContractCreatorToolProps {
     user:  AuthUser | undefined;
 }
 
+const clausuleDefaultPlaceholder = "The tenant needs to open the windows of the room every morning for at least 15 minutes to follow the german Stoßlüften tradition. (not a joke)"
+
+const defaultContractInput: ContractInput = {
+    UUID: "",
+    userId: "unknown",
+    contractType: ContractType.Other,
+    contractName: "",
+    creationDate: "",
+    landlordInfo: {
+        firstName: "",
+        lastName: "",
+        phoneNumber: undefined, 
+        email: undefined
+    }, 
+    tenantInfo: {
+        firstName: "",
+        lastName: "",
+        phoneNumber: undefined, 
+        email: undefined
+    }, 
+    additionalClausules: []
+}
+
 export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
-    const clausuleDefaultPlaceholder = "The tenant needs to open the windows of the room every morning for at least 15 minutes to follow the german Stoßlüften tradition. (not a joke)"
     
-    const [savedClausules, setSavedClausules] = React.useState<string[]>([])
-    const [newClausuleText, setNewClausleText] = React.useState<string>(clausuleDefaultPlaceholder)
-    const [creationStatus, setCreationStatus] = React.useState<string>(ContractCreationStatus.Writting)
+    const [contractInput, setContractInput] = React.useState<ContractInput>(defaultContractInput);
+    const [newClausuleText, setNewClausleText] = React.useState<string>(clausuleDefaultPlaceholder);
+    const [creationStatus, setCreationStatus] = React.useState<string>(ContractCreationStatus.Writting);
 
     const navigate = useNavigate();
 
     const contractsDB = new DynamodbReader("rentalco-contracts")
 
+    const todayDate = new Date().toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+    });
+
     const createContract = () => {
-        const contractPayload = {
-            UUID: uuidv4(),
-            userId: user?.userId,
-            contractType: ContractType.ApartmentRental,
-            contractName: "contractName",
-            landlordInfo: {
-                firstName: "Marc",
-                lastName: "Vernet",
-                phoneNumber: null, 
-                email: null
-            }, 
-            tenantInfo: {
-                firstName: "Maria",
-                lastName: "Pedrassa",
-                phoneNumber: null, 
-                email: null
-            }, 
-            additionalClausules: []
-        }
+        // TODO: Add validation for obligatory parameters
+        const contractPayload: ContractInput = contractInput
+        contractPayload.UUID = uuidv4()
+        contractPayload.userId = user?.userId || "unknown"
+        contractPayload.creationDate = todayDate
 
         setCreationStatus(ContractCreationStatus.Building)
         // TODO: handle success or error and show on UI
@@ -186,7 +202,8 @@ export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
                     <CardActions sx={{ alignSelf: 'flex-end', pt: 2 }}>
                         <Button size="sm" color="danger" variant="solid"
                             onClick={() => {
-                                setSavedClausules(savedClausules.slice(0,index).concat(savedClausules.splice(index+1)))}}
+                                setContractInput({...contractInput, additionalClausules: contractInput.additionalClausules.slice(0,index).concat(contractInput.additionalClausules.splice(index+1))})
+                            }}
                         >
                             Remove clausule
                         </Button>
@@ -225,7 +242,7 @@ export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
               </Button>
               <Button size="sm" variant="solid" 
                 onClick={() => {
-                    setSavedClausules([...savedClausules, newClausuleText])
+                    setContractInput({...contractInput, additionalClausules: [...contractInput.additionalClausules, newClausuleText]})
                     setNewClausleText(clausuleDefaultPlaceholder)
                 }}
               >
@@ -253,13 +270,45 @@ export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
         )
     }
 
+    const AdditionalConditionsCard = () => {
+        return(
+            <Card>
+                <Box sx={{ mb: 1 }}>
+                    <Typography level="title-md"> Other things </Typography>
+                    <Typography level="body-sm">
+                        Some other things
+                    </Typography>
+                </Box> 
+                <Divider />
+                <Stack
+                    direction="row"
+                    spacing={3}
+                    sx={{ display: { xs: 'none', md: 'flex' }, my: 1 }}
+                >
+                    <Stack spacing={2} sx={{ flexGrow: 1 }} >
+                        <div></div>
+                        <div>
+                            <FormControl sx={{ display: { sm: 'contents' } }}>
+                                <FormLabel> Additional conditions</FormLabel>
+                                    <Stack spacing={1}>
+                                        <Checkbox label="Add condition for X thing"/>
+                                        <Checkbox label="Add condition for Y thing"/>
+                                    </Stack>
+                            </FormControl>
+                        </div>
+                    </Stack>
+                </Stack>
+            </Card>
+        )
+    }
+
     const TenantInfoCard = () => {
         return(
             <Card>
                 <Box sx={{ mb: 1 }}>
                     <Typography level="title-md">Tenant general info</Typography>
                     <Typography level="body-sm">
-                        Enter basic info for the contract bla bla bla
+                        Enter basic information for the contract
                     </Typography>
                 </Box> 
                 <Divider />
@@ -283,16 +332,42 @@ export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
                                 }}
                             >
                                 <Stack  direction="row" sx={{ gap: 2}}>
-                                    <Input size="sm" placeholder="First name" />
-                                    <Input size="sm" placeholder="Last name" sx={{ flexGrow: 1 }} />
+                                    <Input size="sm" placeholder="First name" 
+                                        onChange={(event) => 
+                                            setContractInput(
+                                                {
+                                                    ...contractInput, 
+                                                    tenantInfo: {...contractInput.tenantInfo, firstName: event.target.value}
+                                                }
+                                            )
+                                        }
+                                    />
+                                    <Input size="sm" placeholder="Last name" sx={{ flexGrow: 1 }} 
+                                        onChange={(event) => 
+                                            setContractInput(
+                                                {
+                                                    ...contractInput, 
+                                                    tenantInfo: {...contractInput.tenantInfo, lastName: event.target.value}
+                                                }
+                                            )
+                                        }
+                                    />
                                 </Stack>
-
                             </FormControl>
                         </Stack>
                     <Stack direction="row" spacing={2}>
                         <FormControl>
-                            <FormLabel>Role</FormLabel>
-                            <Input size="sm" defaultValue="UI Developer" />
+                            <FormLabel> Phone Number </FormLabel>
+                            <Input size="sm" placeholder="+352 ..." 
+                                onChange={(event) => 
+                                    setContractInput(
+                                        {
+                                            ...contractInput, 
+                                            tenantInfo: {...contractInput.tenantInfo, phoneNumber: event.target.value}
+                                        }
+                                    )
+                                }
+                            />
                         </FormControl>
                         <FormControl sx={{ flexGrow: 1 }}>
                             <FormLabel>Email</FormLabel>
@@ -300,25 +375,116 @@ export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
                                 size="sm"
                                 type="email"
                                 startDecorator={<EmailRoundedIcon />}
-                                placeholder="email"
-                                defaultValue="siriwatk@test.com"
+                                placeholder="example@email.com"
                                 sx={{ flexGrow: 1 }}
+                                onChange={(event) => 
+                                    setContractInput(
+                                        {
+                                            ...contractInput, 
+                                            tenantInfo: {...contractInput.tenantInfo, email: event.target.value}
+                                        }
+                                    )
+                                }
+                            />
+                        </FormControl>
+                    </Stack>
+                </Stack>
+            </Stack>
+        </Card>
+        )
+    }
+
+    const LandlordInfoCard = () => {
+        // TODO: autogenerate defaults from user profile
+        return(
+            <Card>
+                <Box sx={{ mb: 1 }}>
+                    <Typography level="title-md">Landlord general info</Typography>
+                    <Typography level="body-sm">
+                        Enter basic information for the contract
+                    </Typography>
+                </Box> 
+                <Divider />
+
+                <Stack
+                    direction="row"
+                    spacing={3}
+                    sx={{ display: { xs: 'none', md: 'flex' }, my: 1 }}
+                >
+                    <Stack direction="column" spacing={1}></Stack>
+                    <Stack spacing={2} sx={{ flexGrow: 1 }} >
+                        <Stack spacing={1}>
+                            <FormLabel>Name</FormLabel>
+                            <FormControl
+                                sx={{
+                                    display: {
+                                    sm: 'flex-column',
+                                    md: 'flex-row',
+                                    },
+                                    gap: 2,
+                                }}
+                            >
+                                <Stack  direction="row" sx={{ gap: 2}}>
+                                    <Input size="sm" placeholder="First name" 
+                                        onChange={(event) => 
+                                            setContractInput(
+                                                {
+                                                    ...contractInput, 
+                                                    landlordInfo: {...contractInput.landlordInfo, firstName: event.target.value}
+                                                }
+                                            )
+                                        }
+                                    />
+                                    <Input size="sm" placeholder="Last name" sx={{ flexGrow: 1 }} 
+                                        onChange={(event) => 
+                                            setContractInput(
+                                                {
+                                                    ...contractInput, 
+                                                    landlordInfo: {...contractInput.landlordInfo, lastName: event.target.value}
+                                                }
+                                            )
+                                        }
+                                    />
+                                </Stack>
+                            </FormControl>
+                        </Stack>
+                    <Stack direction="row" spacing={2}>
+                        <FormControl>
+                            <FormLabel> Phone Number </FormLabel>
+                            <Input size="sm" placeholder="+352 ..." 
+                                onChange={(event) => 
+                                    setContractInput(
+                                        {
+                                            ...contractInput, 
+                                            landlordInfo: {...contractInput.landlordInfo, phoneNumber: event.target.value}
+                                        }
+                                    )
+                                }
+                            />
+                        </FormControl>
+                        <FormControl sx={{ flexGrow: 1 }}>
+                            <FormLabel>Email</FormLabel>
+                            <Input
+                                size="sm"
+                                type="email"
+                                startDecorator={<EmailRoundedIcon />}
+                                placeholder="example@email.com"
+                                sx={{ flexGrow: 1 }}
+                                onChange={(event) => 
+                                    setContractInput(
+                                        {
+                                            ...contractInput, 
+                                            landlordInfo: {...contractInput.landlordInfo, email: event.target.value}
+                                        }
+                                    )
+                                }
                             />
                         </FormControl>
                     </Stack>
                     <div></div>
-                    <div>
-                        <FormControl sx={{ display: { sm: 'contents' } }}>
-                            <FormLabel> Additional conditions</FormLabel>
-                                <Stack spacing={1}>
-                                    <Checkbox label="Add condition for X thing"/>
-                                    <Checkbox label="Add condition for Y thing"/>
-                            </Stack>
-                        </FormControl>
-                    </div>
                 </Stack>
             </Stack>
-        </Card>
+            </Card>
         )
     }
 
@@ -415,7 +581,7 @@ export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
                         <Tab sx={{ borderRadius: '6px 6px 0 0' }} indicatorInset value={0}>
                         Apartment rental
                         </Tab>
-                        <Tab sx={{ borderRadius: '6px 6px 0 0' }} indicatorInset value={1}>
+                        <Tab sx={{ borderRadius: '6px 6px 0 0' }} indicatorInset value={1} onChange={() => console.log("room")}>
                         Room rental
                         </Tab>
                     </TabList>
@@ -439,10 +605,12 @@ export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
             >
                 {creationStatus == ContractCreationStatus.Writting ?
                     <>
+                        {LandlordInfoCard()}
                         {TenantInfoCard()}
                         {DateRangeCard()}
-                        {savedClausules.map((clausule, index) => Clausule(clausule, index))}
+                        {contractInput.additionalClausules.map((clausule, index) => Clausule(clausule, index))}
                         {AdditionalTextCard()}
+                        {AdditionalConditionsCard()}
                     </> : <></>
                 }
                 {creationStatus == ContractCreationStatus.Done ? 

@@ -96,7 +96,7 @@ export default function OrderTable({user}: OrderTableProps) {
       return {
         id: item.UUID.toString(),
         contractName: item.contractName.toString(),
-        date: 'Feb 3, 2023',
+        date: item.creationDate.toString(),
         type: item.contractType.toString(),
         tenant: {
           initial: tenantInfo.firstName[0],
