@@ -28,7 +28,6 @@ export class SortUtils {
         return stabilizedThis.map((el) => el[0]);
     }
 
-    /* eslint-disable @typescript-eslint/no-explicit-any */
 static getComparator<Key extends keyof any>(
     order: Order,
     orderBy: Key,
