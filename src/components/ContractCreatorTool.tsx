@@ -73,6 +73,14 @@ export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
     const [newClausuleText, setNewClausleText] = React.useState<string>(clausuleDefaultPlaceholder);
     const [creationStatus, setCreationStatus] = React.useState<string>(ContractCreationStatus.Writting);
 
+    const isValidatedInput = () => {
+        return contractInput.contractName != "" 
+            && contractInput.landlordInfo.firstName != "" 
+            && contractInput.landlordInfo.lastName != ""
+            && contractInput.tenantInfo.firstName != ""
+            && contractInput.tenantInfo.lastName != ""
+    }
+
     const navigate = useNavigate();
 
     const contractsDB = new DynamodbReader("rentalco-contracts")
@@ -321,7 +329,7 @@ export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
                     <Stack direction="column" spacing={1}></Stack>
                     <Stack spacing={2} sx={{ flexGrow: 1 }} >
                         <Stack spacing={1}>
-                            <FormLabel>Name</FormLabel>
+                            <FormLabel>Name*</FormLabel>
                             <FormControl
                                 sx={{
                                     display: {
@@ -369,7 +377,7 @@ export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
                     <Stack direction="column" spacing={1}></Stack>
                     <Stack spacing={2} sx={{ flexGrow: 1 }} >
                         <Stack spacing={1}>
-                            <FormLabel>Name</FormLabel>
+                            <FormLabel>Name*</FormLabel>
                             <FormControl
                                 sx={{
                                     display: {
@@ -418,7 +426,7 @@ export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
                             />
                         </FormControl>
                         <FormControl sx={{ flexGrow: 1 }}>
-                            <FormLabel>Email</FormLabel>
+                            <FormLabel>Email*</FormLabel>
                             <Input
                                 size="sm"
                                 type="email"
@@ -462,7 +470,7 @@ export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
                     <Stack direction="column" spacing={1}></Stack>
                     <Stack spacing={2} sx={{ flexGrow: 1 }} >
                         <Stack spacing={1}>
-                            <FormLabel>Name</FormLabel>
+                            <FormLabel>Name*</FormLabel>
                             <FormControl
                                 sx={{
                                     display: {
@@ -511,7 +519,7 @@ export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
                             />
                         </FormControl>
                         <FormControl sx={{ flexGrow: 1 }}>
-                            <FormLabel>Email</FormLabel>
+                            <FormLabel>Email*</FormLabel>
                             <Input
                                 size="sm"
                                 type="email"
@@ -590,6 +598,7 @@ export default function ContractCreatorTool({user}: ContractCreatorToolProps) {
                                 size="sm"
                                 onClick={() => createContract()}
                                 disabled = {
+                                    isValidatedInput() &&
                                     creationStatus == ContractCreationStatus.Writting ? false : true
                                 }
                             >
