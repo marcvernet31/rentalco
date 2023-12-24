@@ -10,7 +10,6 @@ import {
 import AWS from 'aws-sdk';
 import {Amplify } from 'aws-amplify';
 import '@aws-amplify/ui-react/styles.css';
-import { AuthInput } from './types/AuthInput';
 import { Authenticator } from '@aws-amplify/ui-react';
 
 import awsExports from './aws-exports';
@@ -21,8 +20,6 @@ import LogInPage from './components/LogInPage';
 import LandingPage from './landing/LandingPage';
 import OrderDashboard from './components/OrderDashboard';
 import ContractEditor from './components/ContractEditor';
-
-
 
 const awsmobile = {
   "aws_project_region": awsExports.REGION,
@@ -80,41 +77,14 @@ const AuthSettings = () => (
 )
 
 const router = () => createBrowserRouter([
-  {
-    path: "/",
-    element: <LandingPage/>
-  },
-  {
-    path: "/app",
-    element: <AuthOrderDashboard/>
-  ,
-  },
-  {
-    path: "/app/create",
-    element: <AuthContractCreator/>
-    
-  },
-  {
-    path: "/app/edit",
-    element: <AuthContractEditor/>
-    
-  },
-  {
-    path: "/app/support",
-    element: <AuthSupport/>  
-  },
-  {
-    path: "/app/settings",
-    element: <AuthSettings/>
-  },
-  {
-    path: "/app/login",
-    element: <LogInPage/>
-  },
-  {
-    path: '*',
-    element: <h1>404 - Not Found</h1>
-  }
+  { path: "/", element: <LandingPage/> },
+  { path: "/app", element: <AuthOrderDashboard/> },
+  { path: "/app/create", element: <AuthContractCreator/> },
+  { path: "/app/edit", element: <AuthContractEditor/> },
+  { path: "/app/support", element: <AuthSupport/> },
+  { path: "/app/settings", element: <AuthSettings/> },
+  { path: "/app/login", element: <LogInPage/> },
+  { path: '*', element: <h1>404 - Not Found</h1> }
 ]);
 
 const root = ReactDOM.createRoot(
@@ -122,9 +92,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-
-        <RouterProvider router={router()} />
-
+    <RouterProvider router={router()} />
   </React.StrictMode>
 );
 
