@@ -6,11 +6,6 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
-import OrderDashboard from './components/OrderDashboard';
-import ContractEditor from './components/ContractEditor';
-import Support from './components/Support';
-import Settings from './components/Settings';
-import LogInPage from './components/LogInPage';
 
 import AWS from 'aws-sdk';
 import {Amplify } from 'aws-amplify';
@@ -19,7 +14,15 @@ import { AuthInput } from './types/AuthInput';
 import { Authenticator } from '@aws-amplify/ui-react';
 
 import awsExports from './aws-exports';
+import Support from './components/Support';
+import Settings from './components/Settings';
 import { Constants } from './utils/Constants';
+import LogInPage from './components/LogInPage';
+import LandingPage from './landing/LandingPage';
+import OrderDashboard from './components/OrderDashboard';
+import ContractEditor from './components/ContractEditor';
+
+
 
 const awsmobile = {
   "aws_project_region": awsExports.REGION,
@@ -36,30 +39,76 @@ AWS.config.update({
   secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY
 });
 
+const AuthOrderDashboard = () => (
+  <Authenticator>
+    {({ signOut, user }) => (
+      <OrderDashboard signOut={signOut} user={user}/>
+    )}
+  </Authenticator>
+)
 
-const router = ({signOut, user}: AuthInput) => createBrowserRouter([
+const AuthContractCreator = () => (
+  <Authenticator>
+    {({ signOut, user }) => (
+      <ContractCreator signOut={signOut} user={user}/>
+    )}
+  </Authenticator>
+)
+
+const AuthContractEditor = () => (
+  <Authenticator>
+    {({ signOut, user }) => (
+      <ContractEditor signOut={signOut} user={user}/>
+    )}
+  </Authenticator>
+)
+
+const AuthSupport = () => (
+  <Authenticator>
+    {({ signOut, user }) => (
+      <Support signOut={signOut} user={user}/>
+    )}
+  </Authenticator>
+)
+
+const AuthSettings = () => (
+  <Authenticator>
+    {({ signOut, user }) => (
+      <Settings signOut={signOut} user={user}/>
+    )}
+  </Authenticator>
+)
+
+const router = () => createBrowserRouter([
   {
     path: "/",
-    element: <OrderDashboard signOut={signOut} user={user}/>,
+    element: <LandingPage/>
   },
   {
-    path: "/create",
-    element: <ContractCreator signOut={signOut} user={user}/>
+    path: "/app",
+    element: <AuthOrderDashboard/>
+  ,
   },
   {
-    path: "/edit",
-    element: <ContractEditor signOut={signOut} user={user}/>
+    path: "/app/create",
+    element: <AuthContractCreator/>
+    
   },
   {
-    path: "/support",
-    element: <Support signOut={signOut} user={user}/>
+    path: "/app/edit",
+    element: <AuthContractEditor/>
+    
   },
   {
-    path: "/settings",
-    element: <Settings signOut={signOut} user={user}/>
+    path: "/app/support",
+    element: <AuthSupport/>  
   },
   {
-    path: "/login",
+    path: "/app/settings",
+    element: <AuthSettings/>
+  },
+  {
+    path: "/app/login",
     element: <LogInPage/>
   },
   {
@@ -73,11 +122,9 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <Authenticator>
-      {({ signOut, user }) => (
-        <RouterProvider router={router({signOut, user})} />
-      )}
-    </Authenticator>
+
+        <RouterProvider router={router()} />
+
   </React.StrictMode>
 );
 
